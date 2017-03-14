@@ -1,7 +1,19 @@
 ﻿(function () {
     'use strict';
 
-    var MyApp = angular.module('myApp', []);
+var MyApp = angular.module('myApp', ['ngRoute']).
+    config(['$routeProvider', function ($routeProvider) {
+        $routeProvider.
+            when('/', {
+                templateUrl: 'Partials/list.html',
+                controller: 'UpdateController'
+            }).
+            when('/edit/:id', {
+                templateUrl: 'Partials/edit.html',
+                controller: 'EditController'
+            }).
+            otherwise('/');
+    }]);
     MyApp.factory('CityService', ['$http', function ($http) {
 
         var urlBase = 'http://localhost:50869/api';
@@ -9,6 +21,10 @@
         CityService.getCities = function () {
             return $http.get(urlBase + '/Cities');
         };
+
+        CityService.getCity = function (id) {
+            return $http.get(urlBase + '/Cities/' + id);
+        }
 
         CityService.addCity = function (name, country) {
             return $http.post(urlBase + '/Cities', { "Name": name, "Country": country });
@@ -61,7 +77,7 @@
         };
 
         $scope.saveCity = function () {
-            if (typeof $scope.id == undefined || $scope.id == '') $scope.addCity();
+            if (typeof($scope.id) == undefined || $scope.id == '') $scope.addCity();
             else {
                 CityService.editCity($scope.id, $scope.newName, $scope.newCountry)
                 .then(getCities,
@@ -71,4 +87,22 @@
             }
         };
     });
+    MyApp.controller('EditController', function ($scope, $routeParams, $location, CityService) {
+        console.log()
+        CityService.getCity($routeParams.id)
+        .then(function (city) {
+            $scope.city = city.data;
+        },
+        function (error) {
+            $scope.status = 'Unable to load city: ' + error.message;            
+        });
+
+        $scope.saveCity = function () {
+            CityService.editCity($scope.city.Id, $scope.city.Name, $scope.city.Country)
+            .then($location.path('/'),
+            function (error) {
+                $scope.status = 'Unable to save city: ' + error.message;
+            });
+        }
+    });    
 })();

@@ -1,0 +1,27 @@
+﻿<table class="table">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>
+            Country
+        </th>
+        <th></th>
+    </tr>
+    <tr ng-repeat="a in cities">
+        <td>{{a.Id}}</td>
+        <td>{{a.Name}}</td>
+        <td>{{a.Country}}</td>
+        <td>
+            <a ng-href="#!/edit/{{a.Id}}" class="btn btn-warning">Edit</a>
+            <button ng-click="deleteCity(a.Id)" class="btn btn-danger">Delete</button>
+        </td>
+    </tr>
+</table>
+
+<p class="form-group">
+    <label>Name: <input ng-model="newName" class="form-control" /></label>
+</p>
+<p class="form-group">
+    <label>Country: <input ng-model="newCountry" class="form-control" /></label>
+</p>
+<p><button ng-click="addCity()" class="btn btn-primary">Add</button></p>
