@@ -9,13 +9,17 @@
 
 namespace CSD4354_Countries.Models
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
-    
+
     public partial class City
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Country { get; set; }
+        [JsonConverter(typeof(DbGeographyConverter))]
+        public System.Data.Entity.Spatial.DbGeography Location { get; set; }
+        public string WKT { get; set; }
     }
 }

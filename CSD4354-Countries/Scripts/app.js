@@ -1,7 +1,43 @@
-﻿(function () {
+﻿function WKTPointToLatLng(wkt) {
+    pattern = /\-?\d+(\.\d+)?\s+\-?\d+(\.\d+)?/;
+    values = wkt.match(pattern)[0].split(' ');
+    return {
+        lat: parseFloat(values[1]),
+        lng: parseFloat(values[0])
+    };
+}
+
+// Allowing global access
+var map;
+var markers = [];
+
+function initMap() {
+    var myLatLng = { lat: 42.975226, lng: -82.347707 };
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 4,
+        center: myLatLng
+    });
+
+    var marker = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        title: 'Lambton College'
+    });
+    markers.push(marker);
+}
+
+function clearMap() {
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(null);
+    }
+    markers = [];
+}
+
+(function () {
     'use strict';
 
-var MyApp = angular.module('myApp', ['ngRoute', 'ngAnimate']).
+    var MyApp = angular.module('myApp', ['ngRoute', 'ngAnimate']).
     config(['$routeProvider', function ($routeProvider) {
         $routeProvider.
             when('/', {
@@ -26,8 +62,18 @@ var MyApp = angular.module('myApp', ['ngRoute', 'ngAnimate']).
             return $http.get(urlBase + '/Cities/' + id);
         }
 
-        CityService.addCity = function (name, country) {
-            return $http.post(urlBase + '/Cities', { "Name": name, "Country": country });
+        CityService.addCity = function (name, country, lat, lng) {
+            return $http.post(urlBase + '/Cities',
+                {
+                    "Name": name,
+                    "Country": country,
+                    "Location": {
+                        "Geography": {
+                            "CoordinateSystemId": 4326,
+                            "WellKnownText": "POINT (" + lng + " " + lat + ")"
+                        }
+                    }
+                });
         };
 
         CityService.deleteCity = function (id) {
@@ -44,18 +90,30 @@ var MyApp = angular.module('myApp', ['ngRoute', 'ngAnimate']).
 
         getCities();
 
-        function getCities() {
-            CityService.getCities()
-                .then(function (cities) {
-                    $scope.cities = cities.data;
-                },
-                function (error) {
-                    $scope.status = 'Unable to load customer data: ' + error.message;
-                });
-        }
+function getCities() {
+    CityService.getCities()
+        .then(function (cities) {
+            $scope.cities = cities.data;
+            clearMap();
+            for (var i = 0; i < cities.data.length; i++) {
+                if (cities.data[i].WKT != null) {
+                    console.log(cities.data[i].WKT);
+                    console.log(WKTPointToLatLng(cities.data[i].WKT));
+                    markers.push(new google.maps.Marker({
+                        position: WKTPointToLatLng(cities.data[i].WKT),
+                        map: map,
+                        title: cities.data[i].Name
+                    }));
+                }
+            }
+        },
+        function (error) {
+            $scope.status = 'Unable to load customer data: ' + error.message;
+        });
+}
 
         $scope.addCity = function () {
-            CityService.addCity($scope.newName, $scope.newCountry)
+            CityService.addCity($scope.newName, $scope.newCountry, $scope.newLat, $scope.newLng)
             .then(getCities,
             function (error) {
                 $scope.status = 'Unable to save city: ' + error.message;

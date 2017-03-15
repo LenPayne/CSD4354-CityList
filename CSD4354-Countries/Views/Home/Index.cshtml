@@ -1,8 +1,16 @@
-﻿<script src="~/Scripts/angular.js"></script>
-<script src="~/Scripts/angular-route.js"></script>
-<script src="~/Scripts/angular-animate.js"></script>
-<script src="~/Scripts/app.js"></script>
+﻿<div class="row">
+    <div id="map" class="col-md-12" style="height: 500px"></div>
+</div>
 
 <div ng-app="myApp" class="view-container">
     <div class="view-frame" ng-view></div>
 </div>
+
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/angular-route.js"></script>
+<script src="~/Scripts/angular-animate.js"></script>
+<script src="~/Scripts/app.js"></script>
+
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDahm2A7TgKGs7nANbQD3QRAFPgooics4k&callback=initMap">
+</script>

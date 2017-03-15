@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Spatial;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Validation;
 
 namespace CSD4354_Countries
 {
@@ -19,6 +21,16 @@ namespace CSD4354_Countries
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            config.Services.Replace(typeof(IBodyModelValidator), new CustomBodyModelValidator());
+        }
+    }
+
+    public class CustomBodyModelValidator : DefaultBodyModelValidator
+    {
+        public override bool ShouldValidateType(Type type)
+        {
+            return type != typeof(DbGeography) && base.ShouldValidateType(type);
         }
     }
 }
